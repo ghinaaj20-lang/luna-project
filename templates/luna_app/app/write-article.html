@@ -1,0 +1,153 @@
+<!-- Add at the top of HTML files -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Write Article – LUNA</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Source+Serif+Pro:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">LUNA</div>
+    <nav>
+      <a href="/community/">Community</a>
+      <a href="#" id="authLink">Sign In</a>
+      <a href="/profile/"><i class="fas fa-user"></i> Profile</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Write a Cosmic Article</h1>
+      <p>Share your knowledge, observations, or discoveries.</p>
+    </section>
+
+    <section class="features">
+      <div class="upload-container" style="max-width:600px; margin:0 auto;">
+        <form id="articleForm" method="post">
+          {% csrf_token %}
+          <div class="input-group" style="margin-bottom:1.5rem;">
+            <label for="title" style="display:block; margin-bottom:0.5rem; font-weight:500; color:#2c1e5a;">Article Title</label>
+            <input type="text" id="title" placeholder="e.g., How to Photograph the Orion Nebula" required style="width:100%; padding:0.8rem; border:1px solid #e2d9f3; border-radius:10px; font-size:1.2rem;" />
+          </div>
+
+          <div class="input-group" style="margin-bottom:1.5rem;">
+            <label for="location" style="display:block; margin-bottom:0.5rem; font-weight:500; color:#2c1e5a;">Location (Optional)</label>
+            <input type="text" id="location" placeholder="e.g., Mauna Kea, Hawaii" style="width:100%; padding:0.8rem; border:1px solid #e2d9f3; border-radius:10px;" />
+          </div>
+
+          <div class="input-group" style="margin-bottom:1.5rem;">
+            <label for="category" style="display:block; margin-bottom:0.5rem; font-weight:500; color:#2c1e5a;">Category</label>
+            <select id="category" required style="width:100%; padding:0.8rem; border:1px solid #e2d9f3; border-radius:10px;">
+              <option value="">-- Select --</option>
+              <option value="astrophotography">Astrophotography Tips</option>
+              <option value="observation">Observation Logs</option>
+              <option value="science">Astronomy Science</option>
+              <option value="equipment">Equipment Reviews</option>
+              <option value="events">Celestial Events</option>
+              <option value="beginners">For Beginners</option>
+            </select>
+          </div>
+
+          <div class="input-group" style="margin-bottom:2rem;">
+            <label for="content" style="display:block; margin-bottom:0.5rem; font-weight:500; color:#2c1e5a;">Your Article</label>
+            <textarea id="content" rows="10" placeholder="Write your article here..." required style="width:100%; padding:0.8rem; border:1px solid #e2d9f3; border-radius:10px; resize:vertical; font-family:'Source Serif Pro',serif; font-size:1.1rem;"></textarea>
+          </div>
+
+          <button type="submit" class="cta-button" style="width:100%; background:#6b46c1;">Publish Article</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LUNA. All rights reserved under one sky.</p>
+  </footer>
+
+  <script>
+    // Check if user is authenticated
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/profile/', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const user = await response.json();
+          document.getElementById('authLink').textContent = 'Log Out';
+          document.getElementById('authLink').href = '#';
+          document.getElementById('authLink').onclick = async () => {
+            await fetch('/api/logout/', {
+              method: 'POST',
+              credentials: 'include'
+            });
+            window.location.href = '/';
+          };
+          return user;
+        } else {
+          // Not authenticated, redirect to login
+          window.location.href = '/auth/login/';
+          return null;
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = '/auth/login/';
+        return null;
+      }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkAuth();
+      
+      // Handle form submission
+      document.getElementById('articleForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('title').value;
+        const location = document.getElementById('location').value || null;
+        const category = document.getElementById('category').value;
+        const content = document.getElementById('content').value;
+
+        if (!title || !category || !content) {
+          alert('Please fill in all required fields.');
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/content/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              content_type: 'article',
+              title: title,
+              location: location,
+              category: category,
+              content: content,
+              description: null
+            })
+          });
+
+          if (response.ok) {
+            alert('Article published successfully! 🌠');
+            window.location.href = '/community/';
+          } else {
+            const error = await response.json();
+            alert('Error: ' + (error.detail || 'Failed to publish article'));
+          }
+        } catch (error) {
+          console.error('Error publishing article:', error);
+          alert('Network error. Please try again.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

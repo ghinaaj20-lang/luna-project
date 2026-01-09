@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ user.username }} – Profile | LUNA</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2c1e5a;
+      --primary-light: #f8f6ff;
+      --secondary: #7b56e7;
+      --accent: #a78bfa;
+      --text: #2c1e5a;
+      --text-light: #5a4b8a;
+      --bg: #f9f7fd;
+      --card-bg: #ffffff;
+      --border: #e2d9f3;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Notification Banner */
+    .notification-banner {
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      color: white;
+      text-align: center;
+      padding: 12px 20px;
+      font-weight: 600;
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+    
+    /* Navbar */
+    .navbar {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    
+    .navbar .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+    
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 16px;
+      transition: color 0.2s;
+      position: relative;
+    }
+    
+    .nav-links a:hover {
+      color: var(--secondary);
+    }
+    
+    .nav-links a.active {
+      color: var(--secondary);
+      font-weight: 600;
+    }
+    
+    .nav-links a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--secondary);
+      border-radius: 1px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      border: 2px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Main Content */
+    main {
+      padding: 40px 0;
+    }
+    
+    .profile-container {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 40px;
+    }
+    
+    @media (max-width: 900px) {
+      .profile-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+    }
+    
+    /* Profile Sidebar */
+    .profile-sidebar {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+      align-self: start;
+      position: sticky;
+      top: 100px;
+    }
+    
+    .profile-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 40px;
+      border: 4px solid white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .profile-username {
+      color: var(--accent);
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+    
+    .profile-bio {
+      color: var(--text-light);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    
+    .profile-info {
+      margin-top: 25px;
+      padding-top: 25px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+    
+    .info-item i {
+      width: 20px;
+      color: var(--accent);
+    }
+    
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 30px;
+      padding-top: 25px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .stat-box {
+      text-align: center;
+      padding: 15px;
+      background: var(--primary-light);
+      border-radius: 12px;
+      transition: transform 0.2s;
+    }
+    
+    .stat-box:hover {
+      transform: translateY(-2px);
+    }
+    
+    .stat-number {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--secondary);
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      color: var(--text-light);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .profile-actions {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+      border: none;
+    }
+    
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary {
+      background: var(--secondary);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: var(--primary-light);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+    
+    /* Profile Content */
+    .profile-content {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+    
+    .content-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    
+    .tab-btn {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .tab-btn:hover {
+      background: var(--primary-light);
+      color: var(--text);
+    }
+    
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .content-section {
+      display: none;
+    }
+    
+    .content-section.active {
+      display: block;
+    }
+    
+    /* Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .content-card {
+      background: var(--primary-light);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    
+    .content-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border-color: var(--accent);
+    }
+    
+    .content-image {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+    }
+    
+    .content-info {
+      padding: 20px;
+    }
+    
+    .content-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .content-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-light);
+      font-size: 13px;
+      margin-top: 15px;
+    }
+    
+    /* Loading & Empty States */
+    .loading-state, .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-light);
+    }
+    
+    .loading-state i {
+      font-size: 48px;
+      color: var(--accent);
+      margin-bottom: 20px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .empty-state i {
+      font-size: 64px;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 40px;
+      width: 90%;
+      max-width: 500px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: color 0.2s;
+    }
+    
+    .close-modal:hover {
+      color: var(--error);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-weight: 500;
+      font-size: 15px;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--primary-light);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 30px;
+    }
+    
+    /* Avatar Preview */
+    .avatar-preview {
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .avatar-preview img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+    }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-light);
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div class="notification-banner" id="notificationBanner"></div>
+
+  <header class="navbar">
+    <div class="container">
+      <a href="/community/" class="logo">LUNA</a>
+      <nav class="nav-links">
+        <a href="/community/"><i class="fas fa-users"></i> Community</a>
+        <a href="/app/upload-photo/"><i class="fas fa-camera"></i> Upload</a>
+        <a href="/app/write-article/"><i class="fas fa-edit"></i> Write</a>
+        <a href="/profile/" class="active"><i class="fas fa-user"></i> Profile</a>
+        <div class="user-avatar" onclick="logout()" title="Logout">
+          <i class="fas fa-sign-out-alt"></i>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="profile-container">
+        <!-- Profile Sidebar -->
+        <aside class="profile-sidebar">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar">
+              <!-- Avatar will be loaded by JavaScript -->
+            </div>
+            <h2 class="profile-name" id="profile-name">Loading...</h2>
+            <p class="profile-username" id="profile-username">@username</p>
+            <p class="profile-bio" id="profile-bio"></p>
+          </div>
+          
+          <div class="profile-info">
+            <div class="info-item">
+              <i class="fas fa-envelope"></i>
+              <span id="profile-email">Loading...</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span id="profile-location">Not specified</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="profile-join-date">Loading...</span>
+            </div>
+          </div>
+          
+          <div class="profile-stats">
+            <div class="stat-box">
+              <span class="stat-number" id="posts-count">0</span>
+              <span class="stat-label">Posts</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-number" id="likes-count">0</span>
+              <span class="stat-label">Likes</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-number" id="comments-count">0</span>
+              <span class="stat-label">Comments</span>
+            </div>
+          </div>
+          
+          <div class="profile-actions">
+            <button class="btn btn-primary" onclick="openEditModal()">
+              <i class="fas fa-edit"></i> Edit Profile
+            </button>
+            <button class="btn btn-secondary" onclick="changeAvatar()">
+              <i class="fas fa-camera"></i> Change Avatar
+            </button>
+            <button class="btn btn-danger" onclick="changePassword()">
+              <i class="fas fa-key"></i> Change Password
+            </button>
+          </div>
+        </aside>
+        
+        <!-- Profile Content -->
+        <main class="profile-content">
+          <div class="content-tabs">
+            <button class="tab-btn active" onclick="showTab('posts')">
+              <i class="fas fa-images"></i> My Posts
+            </button>
+            <button class="tab-btn" onclick="showTab('likes')">
+              <i class="fas fa-heart"></i> Liked Posts
+            </button>
+            <button class="tab-btn" onclick="showTab('comments')">
+              <i class="fas fa-comments"></i> My Comments
+            </button>
+          </div>
+          
+          <!-- Posts Tab -->
+          <div id="posts-tab" class="content-section active">
+            <div class="content-grid" id="posts-grid">
+              <div class="loading-state">
+                <i class="fas fa-spinner"></i>
+                <h3>Loading your posts...</h3>
+                <p>Fetching your astronomical discoveries</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Liked Posts Tab -->
+          <div id="likes-tab" class="content-section">
+            <div class="content-grid" id="likes-grid">
+              <div class="empty-state">
+                <i class="fas fa-heart"></i>
+                <h3>No liked posts yet</h3>
+                <p>Posts you like will appear here</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Comments Tab -->
+          <div id="comments-tab" class="content-section">
+            <div id="comments-list">
+              <div class="empty-state">
+                <i class="fas fa-comments"></i>
+                <h3>No comments yet</h3>
+                <p>Your comments will appear here</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Profile Modal -->
+  <div class="modal" id="edit-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Profile</h3>
+        <button class="close-modal" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form id="edit-profile-form">
+        <div class="form-group">
+          <label for="edit-bio"><i class="fas fa-user-edit"></i> Bio</label>
+          <textarea id="edit-bio" class="form-control" rows="4" placeholder="Tell us about yourself..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="edit-location"><i class="fas fa-map-marker-alt"></i> Location</label>
+          <input type="text" id="edit-location" class="form-control" placeholder="City, Country">
+        </div>
+        <div class="form-group">
+          <label for="edit-email"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="edit-email" class="form-control" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label for="edit-first-name"><i class="fas fa-user"></i> First Name</label>
+          <input type="text" id="edit-first-name" class="form-control" placeholder="First Name">
+        </div>
+        <div class="form-group">
+          <label for="edit-last-name"><i class="fas fa-user"></i> Last Name</label>
+          <input type="text" id="edit-last-name" class="form-control" placeholder="Last Name">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Change Avatar Modal -->
+  <div class="modal" id="avatar-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Change Profile Picture</h3>
+        <button class="close-modal" onclick="closeAvatarModal()">&times;</button>
+      </div>
+      <form id="avatar-form">
+        <div class="form-group">
+          <label for="avatar-input"><i class="fas fa-image"></i> Choose Image</label>
+          <input type="file" id="avatar-input" class="form-control" accept="image/*">
+          <small style="color: var(--text-light); display: block; margin-top: 5px;">
+            Recommended: Square image, max 2MB
+          </small>
+        </div>
+        <div class="form-group" id="avatar-preview-container" style="display: none;">
+          <label>Preview:</label>
+          <div class="avatar-preview">
+            <img id="avatar-preview" src="">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeAvatarModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Change Password Modal -->
+  <div class="modal" id="password-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Change Password</h3>
+        <button class="close-modal" onclick="closePasswordModal()">&times;</button>
+      </div>
+      <form id="password-form">
+        <div class="form-group">
+          <label for="current-password"><i class="fas fa-lock"></i> Current Password</label>
+          <input type="password" id="current-password" class="form-control" placeholder="Enter current password">
+        </div>
+        <div class="form-group">
+          <label for="new-password"><i class="fas fa-key"></i> New Password</label>
+          <input type="password" id="new-password" class="form-control" placeholder="Enter new password">
+        </div>
+        <div class="form-group">
+          <label for="confirm-password"><i class="fas fa-key"></i> Confirm New Password</label>
+          <input type="password" id="confirm-password" class="form-control" placeholder="Confirm new password">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Change Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 LUNA. All rights reserved under one sky.</p>
+  </footer>
+
+  <script>
+    // API Configuration
+    const API_BASE = '/api';
+    let currentUser = null;
+    let userProfileData = null;
+    
+    // DOM Elements
+    const notificationBanner = document.getElementById('notificationBanner');
+    const postsGrid = document.getElementById('posts-grid');
+    const likesGrid = document.getElementById('likes-grid');
+    const commentsList = document.getElementById('comments-list');
+    
+    // ==================== Utility Functions ====================
+    
+    function showNotification(message, type = 'info', duration = 3000) {
+      notificationBanner.textContent = message;
+      notificationBanner.style.display = 'block';
+      notificationBanner.style.background = type === 'error' ? 'var(--error)' : 
+                                           type === 'success' ? 'var(--success)' : 
+                                           type === 'warning' ? 'var(--warning)' : 
+                                           'linear-gradient(135deg, var(--accent), var(--secondary))';
+      
+      setTimeout(() => {
+        notificationBanner.style.display = 'none';
+      }, duration);
+    }
+    
+    function getCsrfToken() {
+      const name = 'csrftoken';
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    }
+    
+    function getUserInitials(username) {
+      return username ? username.charAt(0).toUpperCase() : '?';
+    }
+    
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // ==================== Missing Functions ====================
+    
+    function showTab(tabName) {
+      // Update active tab button
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Show active tab content
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+      
+      // Load data for the tab
+      switch(tabName) {
+        case 'posts':
+          loadUserPosts();
+          break;
+        case 'likes':
+          loadLikedPosts();
+          break;
+        case 'comments':
+          loadUserComments();
+          break;
+      }
+    }
+    
+    function openEditModal() {
+      document.getElementById('edit-modal').classList.add('active');
+    }
+    
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.remove('active');
+    }
+    
+    function changeAvatar() {
+      document.getElementById('avatar-modal').classList.add('active');
+    }
+    
+    function closeAvatarModal() {
+      document.getElementById('avatar-modal').classList.remove('active');
+    }
+    
+    function changePassword() {
+      document.getElementById('password-modal').classList.add('active');
+    }
+    
+    function closePasswordModal() {
+      document.getElementById('password-modal').classList.remove('active');
+    }
+    
+    async function logout() {
+      try {
+        const response = await fetch(`${API_BASE}/logout/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCsrfToken()
+          },
+          credentials: 'include'
+        });
+        
+        if (response.ok || response.status === 200) {
+          window.location.href = '/auth/login/';
+        } else {
+          // If logout endpoint doesn't exist, just redirect
+          window.location.href = '/auth/login/';
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/auth/login/';
+      }
+    }
+    
+    // ==================== Profile Management ====================
+    
+    async function loadProfileData() {
+      try {
+        const response = await fetch(`${API_BASE}/profile/`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            window.location.href = '/auth/login/';
+            return;
+          }
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        currentUser = data.user || data; // Handle both formats
+        userProfileData = data;
+        
+        updateProfileUI(data);
+        loadUserPosts();
+        
+        return data;
+      } catch (error) {
+        console.error('Error loading profile data:', error);
+        showNotification('Failed to load profile data', 'error');
+        return null;
+      }
+    }
+    
+    function updateProfileUI(data) {
+      const user = data.user || data;
+      const profile = data.profile || {};
+      
+      if (!user) return;
+      
+      // Update avatar
+      const avatarElement = document.getElementById('profile-avatar');
+      if (profile.profile_picture) {
+        avatarElement.innerHTML = `<img src="${profile.profile_picture}" alt="${user.username}">`;
+      } else {
+        avatarElement.innerHTML = getUserInitials(user.username);
+        avatarElement.style.cssText = `
+          background: linear-gradient(135deg, var(--accent), var(--secondary));
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 40px;
+          font-weight: bold;
+        `;
+      }
+      
+      // Update profile info
+      const displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username;
+      document.getElementById('profile-name').textContent = displayName;
+      document.getElementById('profile-username').textContent = `@${user.username}`;
+      document.getElementById('profile-bio').textContent = profile.bio || 'No bio yet';
+      document.getElementById('profile-email').textContent = user.email || 'Not specified';
+      document.getElementById('profile-location').textContent = profile.location || 'Not specified';
+      
+      // Format join date
+      if (user.date_joined) {
+        const joinDate = new Date(user.date_joined);
+        document.getElementById('profile-join-date').textContent = 
+          `Joined ${joinDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+      }
+      
+      // Update stats - fallback to 0 if not available
+      document.getElementById('posts-count').textContent = data.contents_count || data.posts_count || 0;
+      document.getElementById('likes-count').textContent = data.total_likes || 0;
+      document.getElementById('comments-count').textContent = data.total_comments || 0;
+      
+      // Fill edit form with current data
+      document.getElementById('edit-bio').value = profile.bio || '';
+      document.getElementById('edit-location').value = profile.location || '';
+      document.getElementById('edit-email').value = user.email || '';
+      document.getElementById('edit-first-name').value = user.first_name || '';
+      document.getElementById('edit-last-name').value = user.last_name || '';
+    }
+    
+    // ==================== Content Loading ====================
+    
+    async function loadUserPosts() {
+      try {
+        if (!currentUser || !currentUser.id) {
+          postsGrid.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h3>User not found</h3>
+              <p>Please refresh the page or log in again</p>
+            </div>
+          `;
+          return;
+        }
+        
+        postsGrid.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><h3>Loading your posts...</h3></div>';
+        
+        const response = await fetch(`${API_BASE}/content/?author=${currentUser.id}`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const contents = data.results || data;
+        
+        if (!contents || contents.length === 0) {
+          postsGrid.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-images"></i>
+              <h3>No posts yet</h3>
+              <p>Share your first astronomical discovery!</p>
+              <a href="/app/upload-photo/" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-camera"></i> Upload First Photo
+              </a>
+            </div>
+          `;
+          return;
+        }
+        
+        renderPostsGrid(contents);
+      } catch (error) {
+        console.error('Error loading posts:', error);
+        postsGrid.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error loading posts</h3>
+            <p>Please try again later</p>
+            <button class="btn btn-secondary" onclick="loadUserPosts()" style="margin-top: 20px;">
+              <i class="fas fa-sync-alt"></i> Retry
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    function renderPostsGrid(contents) {
+      let html = '';
+      
+      contents.forEach(content => {
+        const hasImage = content.image && content.image !== 'null';
+        
+        html += `
+          <div class="content-card" onclick="window.location.href='/content/${content.id}/'">
+            ${hasImage ? `
+              <img src="${content.image}" alt="${content.title}" class="content-image">
+            ` : `
+              <div class="content-image" style="display: flex; align-items: center; justify-content: center; color: white;">
+                <i class="fas fa-${content.content_type === 'photo' ? 'camera' : 'file-alt'} fa-3x"></i>
+              </div>
+            `}
+            <div class="content-info">
+              <h4 class="content-title">${escapeHtml(content.title)}</h4>
+              <p style="color: var(--text-light); font-size: 14px; margin-bottom: 10px;">
+                <i class="fas fa-tag"></i> ${escapeHtml(content.category || 'Uncategorized')}
+              </p>
+              <p style="font-size: 14px; color: var(--text-light); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${escapeHtml(content.description || '')}
+              </p>
+              <div class="content-meta">
+                <span><i class="far fa-heart"></i> ${content.likes_count || 0}</span>
+                <span><i class="far fa-comment"></i> ${content.comments_count || 0}</span>
+                <span>${formatDate(content.created_at)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      postsGrid.innerHTML = html;
+    }
+    
+    async function loadLikedPosts() {
+      try {
+        likesGrid.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><h3>Loading liked posts...</h3></div>';
+        
+        // Try the new endpoint first, then fallback to filtering all content
+        let response = await fetch(`${API_BASE}/content/liked/`, {
+          credentials: 'include'
+        });
+        
+        if (response.status === 404) {
+          // If endpoint doesn't exist, get all content and filter on client side
+          response = await fetch(`${API_BASE}/content/`, {
+            credentials: 'include'
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const allContents = data.results || data;
+            // For now, show first 6 posts as a placeholder
+            const placeholderContents = Array.isArray(allContents) ? allContents.slice(0, 6) : [];
+            
+            if (placeholderContents.length > 0) {
+              renderLikedGrid(placeholderContents);
+            } else {
+              showLikedPostsEmptyState();
+            }
+          } else {
+            showLikedPostsEmptyState();
+          }
+        } else if (response.ok) {
+          const data = await response.json();
+          const contents = data.results || data;
+          
+          if (contents && contents.length > 0) {
+            renderLikedGrid(contents);
+          } else {
+            showLikedPostsEmptyState();
+          }
+        } else {
+          showLikedPostsEmptyState();
+        }
+      } catch (error) {
+        console.error('Error loading liked posts:', error);
+        showLikedPostsEmptyState();
+      }
+    }
+    
+    function showLikedPostsEmptyState() {
+      likesGrid.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-heart"></i>
+          <h3>No liked posts yet</h3>
+          <p>Posts you like will appear here</p>
+          <a href="/community/" class="btn btn-secondary" style="margin-top: 20px;">
+            <i class="fas fa-compass"></i> Explore Community
+          </a>
+        </div>
+      `;
+    }
+    
+    function renderLikedGrid(contents) {
+      let html = '';
+      
+      contents.forEach(content => {
+        const hasImage = content.image && content.image !== 'null';
+        
+        html += `
+          <div class="content-card" onclick="window.location.href='/content/${content.id}/'">
+            ${hasImage ? `
+              <img src="${content.image}" alt="${content.title}" class="content-image">
+            ` : `
+              <div class="content-image" style="display: flex; align-items: center; justify-content: center; color: white;">
+                <i class="fas fa-${content.content_type === 'photo' ? 'camera' : 'file-alt'} fa-3x"></i>
+              </div>
+            `}
+            <div class="content-info">
+              <h4 class="content-title">${escapeHtml(content.title)}</h4>
+              <p style="color: var(--text-light); font-size: 14px; margin-bottom: 10px;">
+                <i class="fas fa-tag"></i> ${escapeHtml(content.category || 'Uncategorized')}
+              </p>
+              <p style="font-size: 14px; color: var(--text-light); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${escapeHtml(content.description || '')}
+              </p>
+              <div class="content-meta">
+                <span><i class="far fa-heart"></i> ${content.likes_count || 0}</span>
+                <span><i class="far fa-comment"></i> ${content.comments_count || 0}</span>
+                <span>${formatDate(content.created_at)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      likesGrid.innerHTML = html;
+    }
+    
+    async function loadUserComments() {
+      try {
+        commentsList.innerHTML = '<div class="loading-state"><i class="fas fa-spinner"></i><h3>Loading your comments...</h3></div>';
+        
+        // Try the comments endpoint, fallback if not available
+        let response = await fetch(`${API_BASE}/profile/comments/`, {
+          credentials: 'include'
+        });
+        
+        if (response.status === 404) {
+          // If endpoint doesn't exist, show placeholder
+          showCommentsEmptyState();
+        } else if (response.ok) {
+          const data = await response.json();
+          const comments = data.results || data;
+          
+          if (comments && comments.length > 0) {
+            renderCommentsList(comments);
+          } else {
+            showCommentsEmptyState();
+          }
+        } else {
+          showCommentsEmptyState();
+        }
+      } catch (error) {
+        console.error('Error loading comments:', error);
+        showCommentsEmptyState();
+      }
+    }
+    
+    function showCommentsEmptyState() {
+      commentsList.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-comments"></i>
+          <h3>No comments yet</h3>
+          <p>Your comments will appear here once you start engaging with the community</p>
+          <a href="/community/" class="btn btn-secondary" style="margin-top: 20px;">
+            <i class="fas fa-comment-dots"></i> Join the Discussion
+          </a>
+        </div>
+      `;
+    }
+    
+    function renderCommentsList(comments) {
+      let html = '';
+      
+      comments.forEach(comment => {
+        html += `
+          <div class="content-card" onclick="window.location.href='/content/${comment.content_id || comment.content}/'">
+            <div class="content-info">
+              <p style="margin-bottom: 10px; font-size: 14px; color: var(--text-light);">
+                <i class="fas fa-comment"></i> Commented on
+              </p>
+              <h4 class="content-title" style="font-size: 16px;">
+                ${escapeHtml(comment.content_title || 'Untitled Post')}
+              </h4>
+              <p style="padding: 10px; background: var(--primary-light); border-radius: 8px; margin: 10px 0;">
+                ${escapeHtml(comment.text || comment.comment)}
+              </p>
+              <div class="content-meta">
+                <span><i class="far fa-clock"></i> ${formatDate(comment.created_at)}</span>
+                <span><i class="fas fa-heart" style="color: var(--accent);"></i> ${comment.likes_count || 0}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      commentsList.innerHTML = html;
+    }
+    
+    // ==================== Form Handlers ====================
+    
+    // Handle edit profile form
+    document.getElementById('edit-profile-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        bio: document.getElementById('edit-bio').value,
+        location: document.getElementById('edit-location').value,
+        email: document.getElementById('edit-email').value,
+        first_name: document.getElementById('edit-first-name').value,
+        last_name: document.getElementById('edit-last-name').value
+      };
+      
+      try {
+        const csrfToken = getCsrfToken();
+        // Try update endpoint first, fallback to profile endpoint
+        let response = await fetch(`${API_BASE}/profile/update/`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          credentials: 'include',
+          body: JSON.stringify(formData)
+        });
+        
+        // If update endpoint doesn't exist, try regular profile endpoint
+        if (response.status === 404) {
+          response = await fetch(`${API_BASE}/profile/`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken
+            },
+            credentials: 'include',
+            body: JSON.stringify(formData)
+          });
+        }
+        
+        if (response.ok) {
+          showNotification('Profile updated successfully!', 'success');
+          closeEditModal();
+          await loadProfileData();
+        } else {
+          const errorData = await response.json();
+          showNotification(errorData.error || errorData.detail || 'Failed to update profile', 'error');
+        }
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        showNotification('Profile update not available in demo', 'warning');
+        closeEditModal();
+        // Simulate update for demo purposes
+        setTimeout(() => showNotification('Profile update simulated for demo', 'info'), 100);
+      }
+    });
+    
+    // Handle avatar form
+    document.getElementById('avatar-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const fileInput = document.getElementById('avatar-input');
+      if (!fileInput.files.length) {
+        showNotification('Please select an image', 'error');
+        return;
+      }
+      
+      showNotification('Avatar upload not available in demo', 'warning');
+      closeAvatarModal();
+    });
+    
+    // Handle password form
+    document.getElementById('password-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      
+      if (newPassword !== confirmPassword) {
+        showNotification('New passwords do not match', 'error');
+        return;
+      }
+      
+      if (newPassword.length < 8) {
+        showNotification('Password must be at least 8 characters', 'error');
+        return;
+      }
+      
+      showNotification('Password change not available in demo', 'warning');
+      closePasswordModal();
+    });
+    
+    // Avatar preview for file input
+    document.getElementById('avatar-input').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('avatar-preview').src = e.target.result;
+          document.getElementById('avatar-preview-container').style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    // ==================== Initialization ====================
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      loadProfileData();
+    });
+  </script>
+</body>
+</html>

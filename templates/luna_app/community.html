@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Community – LUNA</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2c1e5a;
+      --primary-light: #f8f6ff;
+      --secondary: #7b56e7;
+      --accent: #a78bfa;
+      --text: #2c1e5a;
+      --text-light: #5a4b8a;
+      --bg: #f9f7fd;
+      --card-bg: #ffffff;
+      --border: #e2d9f3;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Notification Banner */
+    .notification-banner {
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      color: white;
+      text-align: center;
+      padding: 12px 20px;
+      font-weight: 600;
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+    
+    /* Navbar */
+    .navbar {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    
+    .navbar .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+    
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 16px;
+      transition: color 0.2s;
+      position: relative;
+    }
+    
+    .nav-links a:hover {
+      color: var(--secondary);
+    }
+    
+    .nav-links a.active {
+      color: var(--secondary);
+      font-weight: 600;
+    }
+    
+    .nav-links a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--secondary);
+      border-radius: 1px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      border: 2px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      width: 200px;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    
+    .dropdown-menu.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .dropdown-item {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    
+    .dropdown-item:hover {
+      background: var(--primary-light);
+    }
+    
+    .dropdown-item i {
+      width: 20px;
+      color: var(--accent);
+    }
+    
+    /* Events Dropdown */
+    .events-nav {
+      position: relative;
+    }
+    
+    .events-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      width: 320px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      border: 1px solid var(--border);
+    }
+    
+    .events-dropdown.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .dropdown-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 16px;
+    }
+    
+    .event-item {
+      padding: 16px;
+      border-bottom: 1px solid var(--primary-light);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .event-item:hover {
+      background: var(--primary-light);
+    }
+    
+    .event-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    
+    .event-date {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .event-description {
+      color: var(--text-light);
+      font-size: 14px;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+    
+    /* Publish Buttons */
+    .publish-buttons {
+      display: flex;
+      gap: 20px;
+      margin: 30px auto;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 600px;
+    }
+    
+    .publish-btn {
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+    }
+    
+    .publish-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .btn-photo {
+      background: var(--secondary);
+      color: white;
+    }
+    
+    .btn-article {
+      background: #6b46c1;
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: var(--primary-light);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    
+    /* Main Content */
+    main {
+      padding: 40px 0;
+    }
+    
+    .container h2 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    /* Posts */
+    .posts {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+    
+    .post {
+      width: 100%;
+      max-width: 600px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .post:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+    
+    .post-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .author-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+    }
+    
+    .author-details h4 {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .post-meta {
+      color: var(--text-light);
+      font-size: 14px;
+    }
+    
+    .post-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .action-btn {
+      background: none;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    
+    .edit-btn {
+      background: var(--primary-light);
+      color: var(--text);
+    }
+    
+    .delete-btn {
+      background: #fed7d7;
+      color: #c53030;
+    }
+    
+    .post-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .post-content {
+      padding: 24px;
+    }
+    
+    .post-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    
+    .post-category {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--secondary);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    .post-description {
+      color: var(--text-light);
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+    
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #c6f6d5;
+      color: #2f855a;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .ai-badge.unverified {
+      background: #fed7d7;
+      color: #c53030;
+    }
+    
+    .post-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .like-btn {
+      background: none;
+      border: none;
+      color: #e53e3e;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      transition: background 0.2s;
+    }
+    
+    .like-btn:hover {
+      background: #fee2e2;
+    }
+    
+    .like-btn.liked {
+      color: #e53e3e;
+      animation: pulse 0.3s;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .post-type {
+      background: var(--primary-light);
+      color: var(--text);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    /* Comments Section */
+    .comments-section {
+      padding: 0 24px 24px;
+    }
+    
+    .comments-header {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    
+    .comment {
+      background: var(--primary-light);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      position: relative;
+      transition: background 0.2s;
+    }
+    
+    .comment:hover {
+      background-color: #f0e9ff;
+    }
+    
+    .comment-author {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    
+    .comment-text {
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+    
+    .comment-actions {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    
+    .comment-actions button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 12px;
+    }
+    
+    .add-comment {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .add-comment input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+    
+    .add-comment input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    .add-comment button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    
+    .add-comment button:hover {
+      background: var(--secondary);
+    }
+    
+    /* Loading & Empty States */
+    .loading-state, .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-light);
+    }
+    
+    .loading-state i {
+      font-size: 48px;
+      color: var(--accent);
+      margin-bottom: 20px;
+      animation: spin 1s linear infinite;
+    }
+    
+    .empty-state i {
+      font-size: 64px;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-light);
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar .container {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .nav-links {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      
+      .publish-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .publish-btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+      }
+      
+      .post {
+        max-width: 100%;
+      }
+      
+      .post-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      
+      .post-actions {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="notification-banner" id="notificationBanner"></div>
+
+  <header class="navbar">
+    <div class="container">
+      <a href="/" class="logo">LUNA</a>
+      <nav class="nav-links">
+        <a href="/community/" class="active"><i class="fas fa-users"></i> Community</a>
+        <div class="events-nav">
+          <a href="#" id="eventsToggle"><i class="fas fa-calendar-alt"></i> Events ▼</a>
+          <div class="events-dropdown" id="eventsDropdown">
+            <div class="dropdown-header">Upcoming Events</div>
+            <div id="eventsList">
+              <div class="event-item">
+                <div class="event-title">Orionid Meteor Shower</div>
+                <div class="event-date">Oct 21, 2024 • 2:00 AM</div>
+                <div class="event-description">Debris from Halley's Comet creates this annual meteor shower</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a href="/app/upload-photo/"><i class="fas fa-camera"></i> Upload</a>
+        <a href="/app/write-article/"><i class="fas fa-edit"></i> Write</a>
+        <div style="position: relative;">
+          <div class="user-avatar" id="userAvatarToggle">
+            <!-- Initials will be loaded by JavaScript -->
+          </div>
+          <div class="dropdown-menu" id="userDropdown">
+            <a href="/profile/" class="dropdown-item">
+              <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="/profile/edit/" class="dropdown-item">
+              <i class="fas fa-cog"></i> Settings
+            </a>
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 8px 0;">
+            <a href="#" onclick="logout()" class="dropdown-item">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="publish-buttons" id="publishButtons">
+      <a href="/app/upload-photo/" class="publish-btn btn-photo">
+        <i class="fas fa-camera"></i> Upload Photo
+      </a>
+      <a href="/app/write-article/" class="publish-btn btn-article">
+        <i class="fas fa-pen"></i> Write Article
+      </a>
+    </div>
+
+    <section class="container">
+      <h2>Latest Discoveries</h2>
+      <div class="posts" id="contentFeed">
+        <div class="loading-state">
+          <i class="fas fa-spinner"></i>
+          <h3>Loading cosmic discoveries...</h3>
+          <p>Fetching the latest astronomical content</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LUNA. All rights reserved under one sky.</p>
+    <p style="margin-top: 10px; font-size: 14px;">
+      <i class="fas fa-star"></i> Explore the cosmos together <i class="fas fa-star"></i>
+    </p>
+  </footer>
+
+  <script>
+    // API Configuration
+    const API_BASE = '/api';
+    let currentUser = null;
+    
+    // DOM Elements
+    const notificationBanner = document.getElementById('notificationBanner');
+    const contentFeed = document.getElementById('contentFeed');
+    const publishButtons = document.getElementById('publishButtons');
+    const userAvatarToggle = document.getElementById('userAvatarToggle');
+    const userDropdown = document.getElementById('userDropdown');
+    const eventsToggle = document.getElementById('eventsToggle');
+    const eventsDropdown = document.getElementById('eventsDropdown');
+    
+    // ==================== Utility Functions ====================
+    
+    function showNotification(message, type = 'info', duration = 3000) {
+      notificationBanner.textContent = message;
+      notificationBanner.style.display = 'block';
+      notificationBanner.style.background = type === 'error' ? 'var(--error)' : 
+                                           type === 'success' ? 'var(--success)' : 
+                                           type === 'warning' ? 'var(--warning)' : 
+                                           'linear-gradient(135deg, var(--accent), var(--secondary))';
+      
+      setTimeout(() => {
+        notificationBanner.style.display = 'none';
+      }, duration);
+    }
+    
+    function getCsrfToken() {
+      const name = 'csrftoken';
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 1) return 'just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+      
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    
+    function getUserInitials(username) {
+      return username ? username.charAt(0).toUpperCase() : '?';
+    }
+    
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // ==================== User Management ====================
+    
+    async function getCurrentUser() {
+      try {
+        const response = await fetch(`${API_BASE}/profile/`, {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          currentUser = data.user;
+          updateUserUI();
+          return currentUser;
+        }
+        return null;
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        return null;
+      }
+    }
+    
+    function updateUserUI() {
+      if (currentUser) {
+        userAvatarToggle.innerHTML = getUserInitials(currentUser.username);
+        userAvatarToggle.title = currentUser.username;
+        publishButtons.style.display = 'flex';
+      } else {
+        userAvatarToggle.innerHTML = '<i class="fas fa-user"></i>';
+        publishButtons.style.display = 'none';
+        showNotification('Please sign in to view the community', 'warning');
+        contentFeed.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-users-slash"></i>
+            <h3>Community Access Required</h3>
+            <p>Please sign in to explore the cosmos with our community</p>
+            <a href="/auth/login/" class="publish-btn btn-photo" style="margin-top: 20px;">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+          </div>
+        `;
+      }
+    }
+    
+    async function logout() {
+      try {
+        const csrfToken = getCsrfToken();
+        const response = await fetch('/auth/logout/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          window.location.href = '/auth/login/';
+        } else {
+          showNotification('Logout failed', 'error');
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+        showNotification('Error during logout', 'error');
+      }
+    }
+    
+    // ==================== Content Management ====================
+    
+    async function loadContent() {
+      try {
+        contentFeed.innerHTML = `
+          <div class="loading-state">
+            <i class="fas fa-spinner"></i>
+            <h3>Loading cosmic discoveries...</h3>
+            <p>Fetching the latest astronomical content</p>
+          </div>
+        `;
+        
+        const response = await fetch(`${API_BASE}/content/feed/`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const contents = data.results || data;
+        
+        if (!contents || contents.length === 0) {
+          contentFeed.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-star"></i>
+              <h3>No discoveries yet</h3>
+              <p>Be the first to share your astronomical findings!</p>
+              ${currentUser ? `
+                <div class="publish-buttons" style="margin-top: 30px;">
+                  <a href="/app/upload-photo/" class="publish-btn btn-photo">
+                    <i class="fas fa-camera"></i> Share Your First Photo
+                  </a>
+                </div>
+              ` : ''}
+            </div>
+          `;
+          return;
+        }
+        
+        renderContent(contents);
+      } catch (error) {
+        console.error('Error loading content:', error);
+        contentFeed.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error Loading Content</h3>
+            <p>Please try again later or check your connection</p>
+            <button onclick="loadContent()" class="publish-btn btn-secondary" style="margin-top: 20px;">
+              <i class="fas fa-sync-alt"></i> Retry
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    function renderContent(contents) {
+      let html = '';
+      
+      contents.forEach(content => {
+        const isOwner = currentUser && currentUser.id === content.author.id;
+        const hasImage = content.image && content.image !== 'null';
+        const isVerified = content.ai_verified !== false;
+        
+        html += `
+          <div class="post" data-content-id="${content.id}">
+            <div class="post-header">
+              <div class="author-info">
+                <div class="author-avatar">
+                  ${getUserInitials(content.author.username)}
+                </div>
+                <div class="author-details">
+                  <h4>${escapeHtml(content.author.username)}</h4>
+                  <div class="post-meta">
+                    <span>${formatDate(content.created_at)}</span>
+                    <span> • ${content.content_type}</span>
+                  </div>
+                </div>
+              </div>
+              ${isOwner ? `
+                <div class="post-actions">
+                  <button onclick="deletePost('${content.id}')" class="action-btn delete-btn">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+            
+            ${hasImage ? `
+              <img src="${content.image}" alt="${escapeHtml(content.title)}" class="post-image" 
+                   onclick="window.open('${content.image}', '_blank')" style="cursor: pointer;">
+            ` : ''}
+            
+            <div class="post-content">
+              <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <span class="post-category">
+                  <i class="fas fa-tag"></i> ${escapeHtml(content.category || 'Uncategorized')}
+                </span>
+                ${content.ai_verified ? `
+                  <span class="ai-badge">
+                    <i class="fas fa-robot"></i> AI Verified
+                  </span>
+                ` : ''}
+              </div>
+              
+              <h3 class="post-title">${escapeHtml(content.title)}</h3>
+              
+              ${content.description ? `
+                <p class="post-description">${escapeHtml(content.description)}</p>
+              ` : ''}
+              
+              ${content.location ? `
+                <p style="color: var(--accent); font-size: 14px; margin-top: 16px;">
+                  <i class="fas fa-map-marker-alt"></i> ${escapeHtml(content.location)}
+                </p>
+              ` : ''}
+            </div>
+            
+            <div class="post-footer">
+              <button onclick="likeContent('${content.id}')" class="like-btn ${content.is_liked ? 'liked' : ''}">
+                <i class="${content.is_liked ? 'fas' : 'far'} fa-heart"></i>
+                <span>${content.likes_count || 0} Likes</span>
+              </button>
+              <span class="post-type">
+                <i class="fas fa-${content.content_type === 'photo' ? 'camera' : 'file-alt'}"></i>
+                ${content.content_type === 'photo' ? 'Photo' : 'Article'}
+              </span>
+            </div>
+            
+            <div class="comments-section">
+              <h4 class="comments-header">
+                <i class="far fa-comment"></i> Comments (${content.comments_count || 0})
+              </h4>
+              
+              <div id="comments-${content.id}">
+                <!-- Comments will be loaded on demand -->
+                <div style="text-align: center; padding: 20px;">
+                  <button onclick="loadComments('${content.id}')" class="action-btn edit-btn">
+                    <i class="fas fa-comments"></i> Load Comments
+                  </button>
+                </div>
+              </div>
+              
+              ${currentUser ? `
+                <div class="add-comment">
+                  <input type="text" 
+                         id="comment-input-${content.id}" 
+                         placeholder="Add a comment..." 
+                         onkeypress="if(event.key === 'Enter') addComment('${content.id}', this.value)">
+                  <button onclick="addComment('${content.id}', document.getElementById('comment-input-${content.id}').value)">
+                    Post
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      });
+      
+      contentFeed.innerHTML = html;
+    }
+    
+    async function deletePost(contentId) {
+      if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        const csrfToken = getCsrfToken();
+        const response = await fetch(`${API_BASE}/content/${contentId}/`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRFToken': csrfToken,
+          },
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          showNotification('Post deleted successfully!', 'success');
+          loadContent();
+        } else if (response.status === 401) {
+          showNotification('Please log in to delete posts', 'warning');
+        } else if (response.status === 403) {
+          showNotification('You can only delete your own posts', 'error');
+        } else {
+          showNotification('Failed to delete post', 'error');
+        }
+      } catch (error) {
+        console.error('Error deleting post:', error);
+        showNotification('Network error', 'error');
+      }
+    }
+    
+    async function likeContent(contentId) {
+      if (!currentUser) {
+        showNotification('Please log in to like posts', 'warning');
+        return;
+      }
+      
+      try {
+        const csrfToken = getCsrfToken();
+        const response = await fetch(`${API_BASE}/content/${contentId}/like/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+          },
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          loadContent();
+        } else if (response.status === 401) {
+          showNotification('Please log in to like posts', 'warning');
+        }
+      } catch (error) {
+        console.error('Error liking content:', error);
+      }
+    }
+    
+    async function addComment(contentId, commentText) {
+      if (!currentUser) {
+        showNotification('Please log in to comment', 'warning');
+        return;
+      }
+      
+      if (!commentText || !commentText.trim()) {
+        showNotification('Please enter a comment', 'warning');
+        return;
+      }
+      
+      try {
+        const csrfToken = getCsrfToken();
+        const response = await fetch(`${API_BASE}/content/${contentId}/comment/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          credentials: 'include',
+          body: JSON.stringify({ text: commentText.trim() })
+        });
+        
+        if (response.ok) {
+          showNotification('Comment added!', 'success');
+          document.getElementById(`comment-input-${contentId}`).value = '';
+          loadContent();
+        } else if (response.status === 401) {
+          showNotification('Please log in to comment', 'warning');
+        }
+      } catch (error) {
+        console.error('Error adding comment:', error);
+        showNotification('Failed to add comment', 'error');
+      }
+    }
+    
+    async function loadComments(contentId) {
+      try {
+        const response = await fetch(`${API_BASE}/content/${contentId}/`);
+        const content = await response.json();
+        
+        const commentsContainer = document.getElementById(`comments-${contentId}`);
+        commentsContainer.innerHTML = '';
+        
+        if (content.comments && content.comments.length > 0) {
+          content.comments.forEach(comment => {
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment';
+            commentElement.innerHTML = `
+              <div class="comment-author">${escapeHtml(comment.user.username)}</div>
+              <div class="comment-text">${escapeHtml(comment.text)}</div>
+              <div class="comment-actions">
+                <small>${formatDate(comment.created_at)}</small>
+              </div>
+            `;
+            commentsContainer.appendChild(commentElement);
+          });
+        } else {
+          commentsContainer.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">No comments yet. Be the first!</p>';
+        }
+      } catch (error) {
+        console.error('Error loading comments:', error);
+      }
+    }
+    
+    // ==================== Event Handlers ====================
+    
+    // User dropdown toggle
+    userAvatarToggle.addEventListener('click', () => {
+      userDropdown.classList.toggle('active');
+    });
+    
+    // Events dropdown toggle
+    eventsToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      eventsDropdown.classList.toggle('active');
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.user-avatar')) {
+        userDropdown.classList.remove('active');
+      }
+      if (!e.target.closest('.events-nav')) {
+        eventsDropdown.classList.remove('active');
+      }
+    });
+    
+    // ==================== Initialization ====================
+    
+    async function init() {
+      // Load user data
+      await getCurrentUser();
+      
+      // Load content
+      if (currentUser) {
+        await loadContent();
+      }
+      
+      // Auto-refresh content every 30 seconds
+      setInterval(async () => {
+        if (currentUser && document.visibilityState === 'visible') {
+          await loadContent();
+        }
+      }, 30000);
+    }
+    
+    // Start the application
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

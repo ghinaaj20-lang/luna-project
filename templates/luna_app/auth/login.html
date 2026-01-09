@@ -1,0 +1,171 @@
+<!-- Add at the top of HTML files -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In – LUNA</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    .auth-container {
+      max-width: 420px;
+      margin: 4rem auto;
+      padding: 0 1.5rem;
+    }
+    .auth-card {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 0.8rem 2.5rem 0.8rem 0.8rem; /* مساحة لزر العين */
+      border: 1px solid #e2d9f3;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+    }
+    .input-group input:focus {
+      border-color: #a78bfa;
+      box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+    }
+    .input-label {
+      position: absolute;
+      top: 0.8rem;
+      left: 0.8rem;
+      color: #5a4b8a;
+      pointer-events: none;
+      background: white;
+      padding: 0 0.2rem;
+      transition: all 0.2s ease;
+      z-index: 1;
+    }
+    .input-group input:focus + .input-label,
+    .input-group input:not(:placeholder-shown) + .input-label {
+      top: -0.6rem;
+      left: 0.5rem;
+      font-size: 0.85rem;
+      color: #a78bfa;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #a78bfa;
+      cursor: pointer;
+      font-size: 0.9rem;
+      z-index: 2;
+    }
+    .switch-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #5a4b8a;
+    }
+    .switch-link a {
+      color: #a78bfa;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .error-message {
+      color: #e53e3e;
+      background: #fed7d7;
+      padding: 0.8rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="logo" style="text-align:center; margin-bottom:1.5rem;">LUNA</div>
+      <h2 style="text-align:center; margin-bottom:0.5rem;">Welcome Back</h2>
+      <p style="text-align:center; color:#5a4b8a; margin-bottom:2rem;">Sign in to your cosmic account</p>
+
+      <div class="error-message" id="errorMessage"></div>
+
+      <form id="loginForm" method="post">
+        {% csrf_token %}
+        <div class="input-group">
+          <input type="text" id="username" name="username" placeholder=" " required />
+          <label for="username" class="input-label">Username</label>
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="password" name="password" placeholder=" " required />
+          <label for="password" class="input-label">Password</label>
+          <button type="button" class="toggle-password" id="togglePassword">(ꈍ.ꈍ)</button>
+        </div>
+        <button type="submit" class="cta-button" style="width:100%;">Sign In</button>
+      </form>
+
+      <p class="switch-link">
+        Don't have an account? <a href="/auth/signup/">Sign Up</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // ✅ زر إظهار/إخفاء كلمة المرور (يعمل 100%)
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordField = document.getElementById('password');
+      const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordField.setAttribute('type', type);
+      this.textContent = type === 'password' ? '(ꈍ.ꈍ)' : '(╹▽╹)';
+    });
+
+    // تسجيل الدخول مع Django API
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Hide previous errors
+      errorMessage.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/login/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Login successful - redirect to community page
+          window.location.href = '/community/';
+        } else {
+          // Show error message
+          errorMessage.textContent = data.error || 'Invalid username or password';
+          errorMessage.style.display = 'block';
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Network error. Please try again.';
+        errorMessage.style.display = 'block';
+        console.error('Login error:', error);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!-- Add at the top of HTML files -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Article – LUNA</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* تنسيق مخصص لصفحة التعديل */
+    .upload-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #e2d9f3;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      font-family: 'Source Serif Pro', serif;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus,
+    .input-group textarea:focus {
+      border-color: #a78bfa;
+      box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+    }
+
+    .input-label {
+      position: absolute;
+      top: 0.8rem;
+      left: 0.8rem;
+      color: #5a4b8a;
+      pointer-events: none;
+      background: white;
+      padding: 0 0.2rem;
+      transition: all 0.2s ease;
+    }
+
+    .input-group input:not(:placeholder-shown) + .input-label,
+    .input-group input:focus + .input-label {
+      top: -0.6rem;
+      left: 0.5rem;
+      font-size: 0.85rem;
+      color: #a78bfa;
+    }
+
+    .cta-button {
+      width: 100%;
+      padding: 0.8rem;
+      background: #6b46c1;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .cta-button:hover {
+      background: #5a3a9e;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 600px) {
+      .upload-container {
+        padding: 0 1rem;
+      }
+
+      .input-group input,
+      .input-group select,
+      .input-group textarea {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">LUNA</div>
+    <nav>
+      <a href="../community/">Community</a>
+      <a href="../auth/login/" id="authLink">Sign In</a>
+      <a href="/profile/"><i class="fas fa-user"></i> Profile</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Edit Your Cosmic Article</h1>
+      <p>Update your knowledge, observations, or discoveries.</p>
+    </section>
+
+    <section class="features">
+      <div class="upload-container">
+        <form id="editForm" method="post">
+          {% csrf_token %}
+          <div class="input-group">
+            <input type="text" id="title" placeholder=" " required />
+            <label for="title" class="input-label">Article Title</label>
+          </div>
+
+          <div class="input-group">
+            <input type="text" id="location" placeholder=" " />
+            <label for="location" class="input-label">Location (Optional)</label>
+          </div>
+
+          <div class="input-group">
+            <select id="category" required>
+              <option value="">-- Select --</option>
+              <option value="astrophotography">Astrophotography Tips</option>
+              <option value="observation">Observation Logs</option>
+              <option value="science">Astronomy Science</option>
+              <option value="equipment">Equipment Reviews</option>
+              <option value="events">Celestial Events</option>
+              <option value="beginners">For Beginners</option>
+            </select>
+            <label for="category" class="input-label">Category</label>
+          </div>
+
+          <div class="input-group">
+            <textarea id="content" rows="10" placeholder=" "></textarea>
+            <label for="content" class="input-label">Your Article</label>
+          </div>
+
+          <button type="submit" class="cta-button">Update Article</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LUNA. All rights reserved under one sky.</p>
+  </footer>
+
+  <script>
+    // التحقق من تسجيل الدخول
+    const currentUser = JSON.parse(localStorage.getItem('lunaCurrentUser'));
+    if (!currentUser) {
+      window.location.href = '../auth/login.html';
+    } else {
+      document.getElementById('authLink').textContent = 'Log Out';
+      document.getElementById('authLink').href = '#';
+      document.getElementById('authLink').onclick = () => {
+        localStorage.removeItem('lunaCurrentUser');
+        window.location.href = '../index.html';
+      };
+    }
+
+    // جلب معرف المقال من الرابط
+    const urlParams = new URLSearchParams(window.location.search);
+    const contentId = urlParams.get('id');
+
+    if (!contentId) {
+      alert('No article selected.');
+      window.location.href = `/app/edit-content/?id=${contentId}`;
+    }
+
+    // دالة للحصول على المحتوى
+    function getContent() {
+      return JSON.parse(localStorage.getItem('lunaContent') || '[]');
+    }
+
+    // دالة لحفظ المحتوى
+    function saveContent(content) {
+      localStorage.setItem('lunaContent', JSON.stringify(content));
+    }
+
+    // عرض بيانات المقال
+    function renderArticle() {
+      const content = getContent();
+      const item = content.find(c => c.id === contentId);
+
+      if (!item) {
+        alert('Article not found.');
+        window.location.href = `/app/edit-content/?id=${contentId}`;
+      }
+
+      // التحقق مما إذا كان المستخدم هو صاحب المقال
+      if (item.userId !== currentUser.id) {
+        alert('You can only edit your own articles.');
+        window.location.href = `/app/edit-content/?id=${contentId}`;
+      }
+
+      // ملء النموذج بالبيانات الحالية
+      document.getElementById('title').value = item.title;
+      document.getElementById('location').value = item.location || '';
+      document.getElementById('category').value = item.category;
+      document.getElementById('content').value = item.content;
+    }
+
+    // حفظ التعديلات
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const title = document.getElementById('title').value.trim();
+      const location = document.getElementById('location').value.trim() || null;
+      const category = document.getElementById('category').value;
+      const contentText = document.getElementById('content').value;
+
+      if (!title || !category || !contentText) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+
+      const content = getContent();
+      const item = content.find(c => c.id === contentId);
+
+      if (item) {
+        // تحديث البيانات
+        item.title = title;
+        item.location = location;
+        item.category = category;
+        item.content = contentText;
+
+        saveContent(content);
+        alert('Article updated successfully! 🌠');
+        window.location.href = `/app/edit-content/?id=${contentId}`;
+      }
+    });
+
+    // تحميل البيانات عند بدء التشغيل
+    document.addEventListener('DOMContentLoaded', renderArticle);
+  </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!-- Add at the top of HTML files -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up – LUNA</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    .auth-container {
+      max-width: 420px;
+      margin: 4rem auto;
+      padding: 0 1.5rem;
+    }
+    .auth-card {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 0.8rem 2.5rem 0.8rem 0.8rem; /* مساحة لزر العين */
+      border: 1px solid #e2d9f3;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+    }
+    .input-group input:focus {
+      border-color: #a78bfa;
+      box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+    }
+    .input-label {
+      position: absolute;
+      top: 0.8rem;
+      left: 0.8rem;
+      color: #5a4b8a;
+      pointer-events: none;
+      background: white;
+      padding: 0 0.2rem;
+      transition: all 0.2s ease;
+      z-index: 1;
+    }
+    .input-group input:focus + .input-label,
+    .input-group input:not(:placeholder-shown) + .input-label {
+      top: -0.6rem;
+      left: 0.5rem;
+      font-size: 0.85rem;
+      color: #a78bfa;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #a78bfa;
+      cursor: pointer;
+      font-size: 0.9rem;
+      z-index: 2;
+    }
+    .switch-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #5a4b8a;
+    }
+    .switch-link a {
+      color: #a78bfa;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .error-message {
+      color: #e53e3e;
+      background: #fed7d7;
+      padding: 0.8rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="logo" style="text-align:center; margin-bottom:1.5rem;">LUNA</div>
+      <h2 style="text-align:center; margin-bottom:0.5rem;">Create Your Account</h2>
+      <p style="text-align:center; color:#5a4b8a; margin-bottom:2rem;">Join the cosmic community</p>
+
+      <div class="error-message" id="errorMessage"></div>
+
+      <form id="signupForm" method="post">
+        {% csrf_token %}
+        <div class="input-group">
+          <input type="text" id="username" name="username" placeholder=" " required />
+          <label for="username" class="input-label">Username</label>
+        </div>
+
+        <div class="input-group">
+          <input type="text" id="first_name" name="first_name" placeholder=" " required />
+          <label for="first_name" class="input-label">Full Name</label>
+        </div>
+
+        <div class="input-group">
+          <input type="email" id="email" name="email" placeholder=" " required />
+          <label for="email" class="input-label">Email</label>
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="password" name="password" placeholder=" " required minlength="6" />
+          <label for="password" class="input-label">Password</label>
+          <button type="button" class="toggle-password" id="togglePassword">(ꈍ.ꈍ)</button>
+        </div>
+
+        <button type="submit" class="cta-button" style="width:100%;">Create Account</button>
+      </form>
+
+      <p class="switch-link">
+        Already have an account? <a href="/auth/login/">Sign In</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // ✅ زر إظهار/إخفاء كلمة المرور
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordField = document.getElementById('password');
+      const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordField.setAttribute('type', type);
+      this.textContent = type === 'password' ? '(ꈍ.ꈍ)' : '(╹▽╹)';
+    });
+
+    // إنشاء حساب مع Django API
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim();
+      const first_name = document.getElementById('first_name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Hide previous errors
+      errorMessage.style.display = 'none';
+
+      // Basic validation
+      if (!username || !first_name || !email || password.length < 6) {
+        errorMessage.textContent = 'Please fill in all fields correctly. Password must be at least 6 characters.';
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/register/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+          },
+          body: JSON.stringify({
+            username: username,
+            first_name: first_name,
+            email: email,
+            password: password
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Registration successful - auto login
+          const loginResponse = await fetch('/api/login/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+              username: username,
+              password: password
+            })
+          });
+
+          if (loginResponse.ok) {
+            window.location.href = '/community/';
+          } else {
+            // Auto login failed, redirect to login page
+            window.location.href = '/auth/login/';
+          }
+        } else {
+          // Show error message
+          errorMessage.textContent = data.error || data.username?.[0] || data.email?.[0] || 'Registration failed';
+          errorMessage.style.display = 'block';
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Network error. Please try again.';
+        errorMessage.style.display = 'block';
+        console.error('Registration error:', error);
+      }
+    });
+  </script>
+</body>
+</html>

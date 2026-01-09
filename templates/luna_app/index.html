@@ -1,0 +1,361 @@
+<!-- Add at the top of HTML files -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LUNA – Cosmic Community</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- Inter للنصوص + Dancing Script للعناوين -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  
+  <style>
+    /* تنسيق القائمة المنسدلة للأحداث */
+    .events-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      width: 320px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      border: 1px solid #e2d9f3;
+    }
+    
+    .events-dropdown.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .dropdown-header {
+      padding: 1rem;
+      border-bottom: 1px solid #e2d9f3;
+      font-weight: 700;
+      color: #2c1e5a;
+    }
+    
+    .event-item {
+      padding: 1rem;
+      border-bottom: 1px solid #f0e9ff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .event-item:hover {
+      background: #f8f6ff;
+    }
+    
+    .event-title {
+      font-weight: 600;
+      color: #2c1e5a;
+      margin-bottom: 0.3rem;
+    }
+    
+    .event-date {
+      color: #a78bfa;
+      font-size: 0.9rem;
+    }
+    
+    .event-description {
+      color: #5a4b8a;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      line-height: 1.4;
+    }
+    
+    /* تنسيق أزرار النشر */
+    .publish-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .publish-btn {
+      padding: 0.8rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .publish-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 94, 158, 0.1);
+    }
+    
+    .btn-photo {
+      background: #a78bfa;
+      color: white;
+    }
+    
+    .btn-article {
+      background: #6b46c1;
+      color: white;
+    }
+    
+    /* تنسيق الإشعارات */
+    .notification-banner {
+      background: #fff8e1;
+      color: #ff8f00;
+      text-align: center;
+      padding: 0.8rem;
+      font-weight: 600;
+      border-bottom: 2px solid #ffd54f;
+      display: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* === Dancing Script للعناوين === */
+    .logo, .hero h1 {
+      font-family: 'Dancing Script', cursive;
+      font-weight: 700;
+      font-size: 3.2rem;
+      letter-spacing: 1px;
+      color: #2c1e5a;
+    }
+
+    /* Inter للنصوص الأساسية */
+    body, p, .event-item, footer, .signin-btn, nav a {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* تنسيق عام */
+    .hero {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    .hero h1 {
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      color: #5a4b8a;
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .logo {
+      font-size: 2.8rem;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #5a4b8a;
+      margin-left: 1.5rem;
+      font-weight: 500;
+    }
+
+    .signin-btn {
+      background: #5a4b8b;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .features h2 {
+      text-align: center;
+      color: #2c1e5a;
+      margin: 2rem 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .posts {
+      text-align: center;
+      padding: 1rem;
+      color: #5a4b8a;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* تأقلم مع الجوال */
+    @media (max-width: 600px) {
+      .logo {
+        font-size: 2.2rem;
+      }
+      
+      .hero h1 {
+        font-size: 2.4rem;
+      }
+      
+      .navbar {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      nav a {
+        margin: 0 0.5rem 0.5rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- إشعار الأحداث القادمة -->
+  <div class="notification-banner" id="notificationBanner"></div>
+
+  <header class="navbar">
+    <div class="logo">LUNA</div>
+    <nav style="position: relative;">
+      <div class="events-nav" style="display: inline-block; position: relative;">
+        <a href="#" id="eventsToggle" style="color:#2c1e5a; text-decoration:none; font-weight:500; margin-left:1.5rem;">Events▼</a>
+        <div class="events-dropdown" id="eventsDropdown"></div>
+      </div>
+      
+      <a href="/auth/login/" class="signin-btn">Sign In</a>
+      <a href="/profile/"><i class="fas fa-user"></i> Profile</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Look up...<br>We all belong to the stars.</h1>
+      <p>Share astrophotos, track celestial events, and connect with stargazers worldwide.</p>
+      
+      <div class="publish-buttons">
+        <a href="/app/upload-photo/" class="publish-btn btn-photo">
+          <i class="fas fa-camera"></i> Upload Photo
+        </a>
+        <a href="/app/write-article/" class="publish-btn btn-article">
+          <i class="fas fa-pen"></i> Write Article
+        </a>
+      </div>
+    </section>
+
+    <section class="features" id="feed">
+      <div class="posts">
+        <p>Sign in to view and share cosmic captures.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LUNA. All rights reserved under one sky.</p>
+  </footer>
+
+  <!-- Font Awesome -->
+  {% comment %} <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> {% endcomment %}
+  
+  <script>
+    // نظام الأحداث الفلكية
+    let cosmicEvents = [];
+    
+    function fetchEvents() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      
+      cosmicEvents = [
+        {
+          id: 'meteor-orionids',
+          title: "Orionid Meteor Shower",
+          description: "Debris from Halley's Comet creates this annual meteor shower. Best viewed after midnight.",
+          date: new Date(year, month, 21, 2),
+          type: "meteor_shower"
+        },
+        {
+          id: 'jupiter-opposition',
+          title: "Jupiter at Opposition",
+          description: "Jupiter will be at its closest approach to Earth, appearing brighter than usual.",
+          date: new Date(year, month + 1, 5, 20),
+          type: "planet"
+        },
+        {
+          id: 'lunar-eclipse',
+          title: "Partial Lunar Eclipse",
+          description: "The Moon will pass through Earth's shadow, creating a partial eclipse.",
+          date: new Date(year, month + 1, 19, 3),
+          type: "eclipse"
+        }
+      ];
+      
+      cosmicEvents = cosmicEvents.filter(event => event.date >= now);
+      renderEventsDropdown();
+      checkUpcomingEvents();
+    }
+    
+    function renderEventsDropdown() {
+      const dropdown = document.getElementById('eventsDropdown');
+      
+      if (cosmicEvents.length === 0) {
+        dropdown.innerHTML = '<div class="event-item" style="padding:1rem; text-align:center; color:#5a4b8a;">No upcoming events</div>';
+        return;
+      }
+      
+      dropdown.innerHTML = cosmicEvents.map(event => `
+        <div class="event-item">
+          <div class="event-title">${event.title}</div>
+          <div class="event-date">${event.date.toLocaleDateString()}</div>
+          <div class="event-description">${event.description}</div>
+        </div>
+      `).join('');
+    }
+    
+    function checkUpcomingEvents() {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const upcoming = cosmicEvents.find(event => 
+        event.date.toDateString() === tomorrow.toDateString()
+      );
+      
+      const notificationBanner = document.getElementById('notificationBanner');
+      if (upcoming) {
+        notificationBanner.textContent = `🔭 Tomorrow: ${upcoming.title}!`;
+        notificationBanner.style.display = 'block';
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchEvents();
+      
+      const toggle = document.getElementById('eventsToggle');
+      const dropdown = document.getElementById('eventsDropdown');
+      
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        dropdown.classList.toggle('active');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.events-nav')) {
+          dropdown.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

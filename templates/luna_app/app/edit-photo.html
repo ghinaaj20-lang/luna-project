@@ -1,0 +1,420 @@
+<!-- Add at the top of HTML files -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>تعديل الصورة – LUNA</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* تنسيق مخصص لصفحة التعديل */
+    .upload-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .upload-area {
+      width: 100%;
+      height: 300px;
+      border: 2px dashed #a78bfa;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 2rem;
+      transition: all 0.2s ease;
+      background-color: #f9f7fd;
+    }
+
+    .upload-area:hover,
+    .upload-area:focus {
+      border-color: #6b46c1;
+      background-color: #f0e6ff;
+      outline: none;
+    }
+
+    .upload-area p {
+      color: #5a4b8a;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+      text-align: center;
+    }
+
+    .upload-area input {
+      display: none;
+    }
+
+    .preview-container {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .preview-img {
+      width: 100%;
+      border-radius: 12px;
+      max-height: 400px;
+      object-fit: cover;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #e2d9f3;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus,
+    .input-group textarea:focus {
+      border-color: #6b46c1;
+      box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.2);
+    }
+
+    .input-label {
+      position: absolute;
+      top: 0.8rem;
+      right: 0.8rem;
+      color: #5a4b8a;
+      pointer-events: none;
+      background: white;
+      padding: 0 0.2rem;
+      transition: all 0.2s ease;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    .input-group input:not(:placeholder-shown) + .input-label,
+    .input-group input:focus + .input-label,
+    .input-group select:not([value=""]) + .input-label,
+    .input-group select:focus + .input-label,
+    .input-group textarea:not(:placeholder-shown) + .input-label,
+    .input-group textarea:focus + .input-label {
+      top: -0.6rem;
+      right: 0.5rem;
+      font-size: 0.85rem;
+      color: #6b46c1;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .cta-button,
+    .cancel-button {
+      padding: 0.8rem 1.2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Tajawal', sans-serif;
+      text-align: center;
+      flex: 1;
+    }
+
+    .cta-button {
+      background: #6b46c1;
+      color: white;
+      border: none;
+    }
+
+    .cancel-button {
+      background: #f0e6ff;
+      color: #5a4b8a;
+      border: 1px solid #e2d9f3;
+    }
+
+    .cta-button:hover {
+      background: #5a3a9e;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .cancel-button:hover {
+      background: #e6d9ff;
+      border-color: #a78bfa;
+    }
+
+    @media (max-width: 600px) {
+      .upload-container {
+        padding: 0 1rem;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .input-group input,
+      .input-group select,
+      .input-group textarea {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">LUNA</div>
+    <nav>
+      <a href="/community/">المجتمع</a>
+      <a href="#" id="authLink">تسجيل الدخول</a>
+      <a href="/profile/"><i class="fas fa-user"></i> Profile</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>عدّل صورتك الفلكية</h1>
+      <p>حدّث لقطتك الكونية.</p>
+    </section>
+
+    <section class="features">
+      <div class="upload-container">
+        <div class="upload-area" id="uploadArea" role="button" tabindex="0" aria-label="انقر لتغيير الصورة">
+          <p>انقر لتغيير الصورة</p>
+          <input type="file" id="photoInput" accept="image/*" />
+        </div>
+        
+        <div class="preview-container" id="previewContainer">
+          <img id="previewImg" src="" class="preview-img" alt="معاينة الصورة" />
+        </div>
+
+        <form id="editForm" method="post">
+          {% csrf_token %}
+          <div class="input-group">
+            <input type="text" id="title" placeholder=" " required />
+            <label for="title" class="input-label">العنوان</label>
+          </div>
+
+          <div class="input-group">
+            <input type="text" id="location" placeholder=" " />
+            <label for="location" class="input-label">الموقع</label>
+          </div>
+
+          <div class="input-group">
+            <select id="category" required>
+              <option value="">-- اختر --</option>
+              <option value="galaxy">مجرة</option>
+              <option value="nebula">سديم</option>
+              <option value="planet">كوكب</option>
+              <option value="moon">القمر</option>
+              <option value="stars">عنقود نجمي</option>
+              <option value="eclipse">كسوف/خسوف</option>
+              <option value="other">أخرى</option>
+            </select>
+            <label for="category" class="input-label">الفئة</label>
+          </div>
+
+          <div class="input-group">
+            <textarea id="description" rows="3" placeholder=" "></textarea>
+            <label for="description" class="input-label">الوصف (اختياري)</label>
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="cta-button">تحديث الصورة</button>
+            <button type="button" class="cancel-button" id="cancelBtn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LUNA. جميع الحقوق محفوظة تحت سماء واحدة.</p>
+  </footer>
+
+  <script>
+    // Get content ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const contentId = urlParams.get('id');
+
+    if (!contentId) {
+      alert('لم يتم تحديد منشور.');
+      window.location.href = '/community/';
+    }
+
+    // Check if user is authenticated
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/profile/', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const user = await response.json();
+          document.getElementById('authLink').textContent = 'تسجيل الخروج';
+          document.getElementById('authLink').href = '#';
+          document.getElementById('authLink').onclick = async () => {
+            await fetch('/api/logout/', {
+              method: 'POST',
+              credentials: 'include'
+            });
+            window.location.href = '/';
+          };
+          return user;
+        } else {
+          // Not authenticated, redirect to login
+          window.location.href = '/auth/login/';
+          return null;
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = '/auth/login/';
+        return null;
+      }
+    }
+
+    // Load post data
+    async function loadPost() {
+      try {
+        const response = await fetch(`/api/content/${contentId}/`, {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const post = await response.json();
+          
+          // Check if user owns this post
+          const user = await checkAuth();
+          if (user && user.user && user.user.id !== post.author.id) {
+            alert('يمكنك تعديل منشوراتك الخاصة فقط.');
+            window.location.href = '/community/';
+            return;
+          }
+          
+          // Fill form with post data
+          document.getElementById('title').value = post.title || '';
+          document.getElementById('location').value = post.location || '';
+          document.getElementById('category').value = post.category || '';
+          document.getElementById('description').value = post.description || '';
+          
+          const previewImg = document.getElementById('previewImg');
+          if (post.image) {
+            previewImg.src = post.image;
+          } else if (post.image_url) {
+            previewImg.src = post.image_url;
+          } else {
+            previewImg.src = 'https://via.placeholder.com/600x400/f0e6ff/2c1e5a?text=Astrophoto';
+          }
+          
+          return post;
+        } else {
+          alert('المنشور غير موجود.');
+          window.location.href = '/community/';
+          return null;
+        }
+      } catch (error) {
+        console.error('Error loading post:', error);
+        alert('خطأ في تحميل البيانات.');
+        window.location.href = '/community/';
+        return null;
+      }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkAuth();
+      const post = await loadPost();
+      
+      if (!post) return;
+
+      // File input events
+      document.getElementById('photoInput').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Upload area click
+      document.getElementById('uploadArea').addEventListener('click', () => {
+        document.getElementById('photoInput').click();
+      });
+
+      // Keyboard support
+      document.getElementById('uploadArea').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          document.getElementById('photoInput').click();
+        }
+      });
+
+      // Cancel button
+      document.getElementById('cancelBtn').addEventListener('click', () => {
+        if (confirm('هل أنت متأكد من إلغاء التعديلات؟')) {
+          window.location.href = '/community/';
+        }
+      });
+
+      // Form submission
+      document.getElementById('editForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const title = document.getElementById('title').value.trim();
+        const location = document.getElementById('location').value.trim() || null;
+        const category = document.getElementById('category').value;
+        const description = document.getElementById('description').value.trim() || null;
+
+        if (!title || !category) {
+          alert('يرجى تعبئة الحقول المطلوبة.');
+          return;
+        }
+
+        const file = document.getElementById('photoInput').files[0];
+        const formData = new FormData();
+        
+        formData.append('title', title);
+        formData.append('location', location || '');
+        formData.append('category', category);
+        formData.append('description', description || '');
+        
+        if (file) {
+          formData.append('image', file);
+        }
+
+        try {
+          const response = await fetch(`/api/content/${contentId}/`, {
+            method: 'PATCH',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            credentials: 'include',
+            body: formData
+          });
+
+          if (response.ok) {
+            alert('تم تحديث الصورة بنجاح! 🌠');
+            window.location.href = '/community/';
+          } else {
+            const error = await response.json();
+            alert('خطأ: ' + (error.detail || 'فشل تحديث الصورة'));
+          }
+        } catch (error) {
+          console.error('Error updating photo:', error);
+          alert('خطأ في الشبكة. يرجى المحاولة مرة أخرى.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

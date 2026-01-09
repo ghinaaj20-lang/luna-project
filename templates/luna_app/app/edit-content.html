@@ -1,0 +1,446 @@
+<!-- Add at the top of HTML files -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Content – LUNA</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    .edit-container {
+      max-width: 650px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .upload-area {
+      width: 100%;
+      height: 280px;
+      border: 2px dashed #a78bfa;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      margin: 1.5rem 0;
+      background-color: #f9f7fd;
+      transition: all 0.2s ease;
+    }
+
+    .upload-area:hover {
+      border-color: #6b46c1;
+      background-color: #f0e6ff;
+    }
+
+    .preview-img {
+      width: 100%;
+      max-height: 350px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #e2d9f3;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus,
+    .input-group textarea:focus {
+      border-color: #6b46c1;
+      box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.2);
+    }
+
+    .input-label {
+      position: absolute;
+      top: 0.8rem;
+      left: 0.8rem;
+      color: #5a4b8a;
+      pointer-events: none;
+      background: white;
+      padding: 0 0.2rem;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .input-group input:not(:placeholder-shown) + .input-label,
+    .input-group input:focus + .input-label,
+    .input-group textarea:not(:placeholder-shown) + .input-label,
+    .input-group textarea:focus + .input-label {
+      top: -0.6rem;
+      left: 0.5rem;
+      font-size: 0.85rem;
+      color: #6b46c1;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      padding: 0.8rem 1.2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      text-align: center;
+      flex: 1;
+    }
+
+    .btn-primary {
+      background: #6b46c1;
+      color: white;
+      border: none;
+    }
+
+    .btn-secondary {
+      background: #f0e6ff;
+      color: #5a4b8a;
+      border: 1px solid #e2d9f3;
+    }
+
+    .btn-primary:hover {
+      background: #5a3a9e;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .btn-secondary:hover {
+      background: #e6d9ff;
+      border-color: #a78bfa;
+    }
+
+    .type-badge {
+      display: inline-block;
+      background: #e6d9ff;
+      color: #6b46c1;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">LUNA</div>
+    <nav>
+      <a href="../community.html">Community</a>
+      <a href="#" id="authLink">Sign In</a>
+      <a href="/profile/"><i class="fas fa-user"></i> Profile</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1 id="pageTitle">Edit Your Post</h1>
+    </section>
+
+    <section class="features">
+      <div class="edit-container">
+        <div class="type-badge" id="typeBadge"></div>
+
+        <form id="editForm" method="post">
+          {% csrf_token %}
+          <div id="imageSection" style="display:none;">
+            <div class="upload-area" id="uploadArea">
+              <p>Click to change image</p>
+              <input type="file" id="photoInput" accept="image/*" hidden />
+            </div>
+            <div id="previewContainer">
+              <img id="previewImg" class="preview-img" src="" alt="Preview" 
+                onerror="this.src='https://via.placeholder.com/600x400/f0e6ff/2c1e5a?text=Astrophoto'" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <input type="text" id="title" placeholder=" " required />
+            <label for="title" class="input-label">Title</label>
+          </div>
+
+          <div class="input-group" id="locationGroup" style="display:none;">
+            <input type="text" id="location" placeholder=" " />
+            <label for="location" class="input-label">Location</label>
+          </div>
+
+          <div class="input-group" id="categoryGroup" style="display:none;">
+            <select id="category">
+              <option value="">-- Select Category --</option>
+              <option value="galaxy">Galaxy</option>
+              <option value="nebula">Nebula</option>
+              <option value="planet">Planet</option>
+              <option value="moon">Moon</option>
+              <option value="stars">Star Cluster</option>
+              <option value="eclipse">Eclipse</option>
+              <option value="other">Other</option>
+            </select>
+            <label for="category" class="input-label">Category</label>
+          </div>
+
+          <div class="input-group" id="contentGroup" style="display:none;">
+            <textarea id="content" rows="6" placeholder=" "></textarea>
+            <label for="content" class="input-label">Article Content</label>
+          </div>
+
+          <div class="input-group" id="descriptionGroup" style="display:none;">
+            <textarea id="description" rows="3" placeholder=" "></textarea>
+            <label for="description" class="input-label">Description (Optional)</label>
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LUNA. All rights reserved under one sky.</p>
+  </footer>
+
+  <script>
+    const currentUser = JSON.parse(localStorage.getItem('lunaCurrentUser'));
+    if (!currentUser) {
+      window.location.href = '../auth/login.html';
+    } else {
+      document.getElementById('authLink').textContent = 'Log Out';
+      document.getElementById('authLink').href = '#';
+      document.getElementById('authLink').onclick = () => {
+        localStorage.removeItem('lunaCurrentUser');
+        window.location.href = '../index.html';
+      };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const contentId = urlParams.get('id');
+    if (!contentId) {
+      alert('No content ID provided.');
+      window.location.href = `/app/edit-content/?id=${contentId}`;
+    }
+
+    function getContent() {
+      return JSON.parse(localStorage.getItem('lunaContent') || '[]');
+    }
+
+    function saveContent(content) {
+      localStorage.setItem('lunaContent', JSON.stringify(content));
+    }
+
+    // === نفس دالة التحقق الفلكي ===
+    function verifyAstroPhoto(category, location, timestamp) {
+      if (!location || !category || !timestamp) {
+        return { verified: false, confidence: 0, reason: "Missing data" };
+      }
+
+      const date = new Date(timestamp);
+      const eclipseDates = [
+        { start: new Date(2025, 2, 29), end: new Date(2025, 2, 29) },
+        { start: new Date(2025, 8, 7), end: new Date(2025, 8, 7) }
+      ];
+      const isEclipseDay = eclipseDates.some(e => date >= e.start && date <= e.end);
+
+      let baseConfidence = 0.5;
+      let verified = false;
+      let reason = "General astrophotography";
+
+      if (category === 'eclipse') {
+        if (isEclipseDay) {
+          baseConfidence = 0.92;
+          verified = true;
+          reason = "Eclipse confirmed for this date";
+        } else {
+          baseConfidence = 0.1;
+          verified = false;
+          reason = "No eclipse on this date";
+        }
+      }
+      else if (category === 'moon') {
+        baseConfidence = 0.85;
+        verified = true;
+        reason = "Moon is generally visible";
+      }
+      else if (category === 'planet') {
+        baseConfidence = 0.75;
+        verified = true;
+        reason = "Planet visibility assumed";
+      }
+      else if (['galaxy', 'nebula', 'stars'].includes(category)) {
+        baseConfidence = 0.8;
+        verified = true;
+        reason = "Deep-sky object visibility assumed";
+      }
+
+      if (/[اأإبتثجحخدذرزسشصضطظعغفقكلمنهوي]/.test(location)) {
+        baseConfidence = Math.min(0.95, baseConfidence + 0.05);
+      }
+
+      const daysOld = (new Date() - date) / (1000 * 60 * 60 * 24);
+      if (daysOld <= 7) {
+        baseConfidence = Math.min(0.95, baseConfidence + 0.07);
+      }
+
+      const randomness = (Math.random() * 0.1) - 0.05;
+      const finalConfidence = Math.min(0.99, Math.max(0.1, baseConfidence + randomness));
+      const finalVerified = finalConfidence > 0.6;
+
+      return {
+        verified: finalVerified,
+        confidence: finalConfidence,
+        reason: reason
+      };
+    }
+
+    function renderPost() {
+      const content = getContent();
+      const item = content.find(c => c.id === contentId);
+
+      if (!item) {
+        alert('Content not found.');
+        window.location.href = `/app/edit-content/?id=${contentId}`;
+        return;
+      }
+
+      if (item.userId !== currentUser.id) {
+        alert('You can only edit your own posts.');
+        window.location.href = `/app/edit-content/?id=${contentId}`;
+        return;
+      }
+
+      const typeBadge = document.getElementById('typeBadge');
+      const pageTitle = document.getElementById('pageTitle');
+      if (item.type === 'photo') {
+        typeBadge.textContent = 'Astrophotography';
+        pageTitle.textContent = 'Edit Your Photo';
+        
+        document.getElementById('imageSection').style.display = 'block';
+        document.getElementById('locationGroup').style.display = 'block';
+        document.getElementById('categoryGroup').style.display = 'block';
+        document.getElementById('descriptionGroup').style.display = 'block';
+        document.getElementById('contentGroup').style.display = 'none';
+        
+        document.getElementById('previewImg').src = item.imageUrl || '';
+        document.getElementById('location').value = item.location || '';
+        document.getElementById('category').value = item.category || '';
+        document.getElementById('description').value = item.description || '';
+      } else {
+        typeBadge.textContent = 'Article';
+        pageTitle.textContent = 'Edit Your Article';
+        
+        document.getElementById('imageSection').style.display = 'none';
+        document.getElementById('locationGroup').style.display = 'none';
+        document.getElementById('categoryGroup').style.display = 'none';
+        document.getElementById('descriptionGroup').style.display = 'none';
+        document.getElementById('contentGroup').style.display = 'block';
+        
+        document.getElementById('content').value = item.content || '';
+      }
+
+      document.getElementById('title').value = item.title || '';
+
+      document.getElementById('photoInput').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            document.getElementById('previewImg').src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      document.getElementById('uploadArea').addEventListener('click', () => {
+        document.getElementById('photoInput').click();
+      });
+    }
+
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      if (confirm('Discard changes?')) {
+        window.location.href = `/app/edit-content/?id=${contentId}`;
+      }
+    });
+
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const title = document.getElementById('title').value.trim();
+      if (!title) {
+        alert('Title is required.');
+        return;
+      }
+
+      const content = getContent();
+      const item = content.find(c => c.id === contentId);
+      if (!item) return;
+
+      item.title = title;
+
+      if (item.type === 'photo') {
+        const location = document.getElementById('location').value.trim() || null;
+        const category = document.getElementById('category').value || 'other';
+        const description = document.getElementById('description').value.trim() || null;
+
+        item.location = location;
+        item.category = category;
+        item.description = description;
+
+        // ✅ تحديث التحقق عبر الذكاء الاصطناعي عند التعديل
+        const aiResult = verifyAstroPhoto(category, location, item.timestamp);
+        item.aiVerified = aiResult.verified;
+        item.aiConfidence = aiResult.confidence;
+        item.aiReason = aiResult.reason;
+
+        const file = document.getElementById('photoInput').files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            item.imageUrl = e.target.result;
+            saveContent(content);
+            alert('Photo updated successfully! 🌠\nAI verification updated.');
+            window.location.href = `/app/edit-content/?id=${contentId}`;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          saveContent(content);
+          alert('Changes saved! 🌠\nAI verification updated.');
+          window.location.href = `/app/edit-content/?id=${contentId}`;
+        }
+      } else {
+        item.content = document.getElementById('content').value.trim() || '';
+        saveContent(content);
+        alert('Article updated successfully! ✍️');
+        window.location.href = `/app/edit-content/?id=${contentId}`;
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', renderPost);
+  </script>
+</body>
+</html>
