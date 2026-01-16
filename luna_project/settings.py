@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-190^-t*^a16(lcg+$+j1-b=f+n9$nt#142wst#k@d+jp5jah9v
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['luna-project-production.up.railway.app']
 
 
 # Application definition
